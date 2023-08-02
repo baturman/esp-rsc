@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+
+<head>
+    <title>esxi01-esp | 192.168.0.23</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm"
+        crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.7.0.slim.min.js"
+        integrity="sha256-tG5mcZUtJsZvyKAxYLVXrmjKBVLd6VpVccqz/r4ypFE=" crossorigin="anonymous"></script>
+</head>
+
+<style>
+    path.on {
+        fill: #198754;
+    }
+
+    path.off {
+        fill: #dc3545;
+    }
+
+    path.unknown {
+        fill: #343a40;
+    }
+</style>
+
+
+
+<body>
+
+    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+        <div class="container">
+            <a class="navbar-brand" href="#">Remote Server Controller Interface</a>
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                        aria-expanded="false">
+                        Actions
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#">Power On</a></li>
+                        <li><a class="dropdown-item" href="#">Power Off</a></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li><a class="dropdown-item" href="#">Shutdown</a></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li><a class="dropdown-item" href="#">Reset</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+
+    <div class="container">
+        <div class="row mt-3">
+            <div class="col-9 d-flex align-self-stretch">
+                <div class="card w-100">
+                    <div class="card-header fw-bolder">
+                        System Information
+                    </div>
+                    <div class="card-body fs-7">
+
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <table class="table table-sm">
+                                    <tbody>
+                                        <tr>
+                                            <th scope="row" class="w-25">SSID:</th>
+                                            <td id="ssid" class="w-75 text-secondary">N/A</td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row" class="w-25">Hostname:</th>
+                                            <td id="hostname" class="w-75 text-secondary">N/A</td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row" class="w-25">IP Address:</th>
+                                            <td id="ip" class="w-75 text-secondary">N/A</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="col">
+                                <table class="table table-sm">
+                                    <tbody>
+                                        <tr>
+                                            <th scope="row" class="w-25">Server Port:</th>
+                                            <td id="port" class="w-75 text-secondary">N/A</td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row" class="w-25">Wifi Signal:</th>
+                                            <td class="w-75 text-secondary"><span id="rssi">0</span> dBm</td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row" class="w-25">Timezone:</th>
+                                            <td id="timezone" class="w-75 text-secondary">N/A</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            <div class="col-3 d-flex align-self-stretch">
+                <div class="card w-100">
+                    <div class="card-header fw-bolder">
+                        System Status
+                    </div>
+                    <div class="card-body text-center">
+                        <svg width="100px" height="100px" viewBox="0 0 24 24">
+                            <g id="_icons">
+                                <g>
+                                    <path class="powericon unknown"
+                                        d="M16.6,4.2c-0.5-0.3-1.1-0.1-1.4,0.4c-0.3,0.5-0.1,1.1,0.4,1.4c2.1,1.3,3.5,3.6,3.5,6c0,3.9-3.1,7-7,7s-7-3.1-7-7    c0-2.5,1.4-4.8,3.5-6.1C9,5.6,9.2,5,8.9,4.6C8.6,4.1,8,3.9,7.5,4.2C4.7,5.8,3,8.8,3,12c0,5,4,9,9,9s9-4,9-9    C21,8.8,19.3,5.9,16.6,4.2z" />
+                                    <path class="powericon unknown"
+                                        d="M12,13c0.6,0,1-0.4,1-1V3c0-0.6-0.4-1-1-1s-1,0.4-1,1v9C11,12.6,11.4,13,12,13z" />
+                                </g>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-3 text-center">
+            <div class="col d-flex align-self-stretch">
+                <div class="card mb-3 w-100">
+                    <div class="card-header fw-bolder">CPU</div>
+                    <div  class="card-body">
+                        <h1 id="cpu-color" class="card-title fw-bold text-secondary"><span id="cpu">0</span> &#x2103;</h1>
+                    </div>
+                </div>
+            </div>
+            <div class="col d-flex align-self-stretch">
+                <div class="card mb-3 w-100">
+                    <div class="card-header">Power Supply</div>
+                    <div class="card-body">
+                        <h1 id="psu-color" class="card-title fw-bold text-secondary"><span id="psu">0</span> &#x2103;</h1>
+                    </div>
+                </div>
+            </div>
+            <div class="col d-flex align-self-stretch">
+                <div class="card mb-3 w-100">
+                    <div class="card-header fw-bolder">Network Interface Card</div>
+                    <div  class="card-body">
+                        <h1 id="nic-color" class="card-title fw-bold text-secondary"><span id="nic">0</span> &#x2103;</h1>
+                    </div>
+                </div>
+            </div>
+            <div class="col d-flex align-self-stretch">
+                <div class="card mb-3 w-100">
+                    <div class="card-header fw-bolder">Raid Controller</div>
+                    <div class="card-body">
+                        <h1 id="raid-color" class="card-title fw-bold text-secondary"><span id="raid">0</span> &#x2103;</h1>
+                    </div>
+                </div>
+            </div>
+            <div class="col d-flex align-self-stretch">
+                <div class="card mb-3 w-100">
+                    <div class="card-header fw-bolder">SAS Expander</div>
+                    <div class="card-body">
+                        <h1 id="sas-color" class="card-title fw-bold text-secondary"><span id="exp">0</span> &#x2103;</h1>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+
+        
+
+        document.onreadystatechange = function () {
+            
+            function determineClass(element, value, low, high){
+                let colorClass = "text-secondary";
+                if (value <= low){
+                    colorClass = "text-success";
+                }else if (value <= high){
+                    colorClass = "text-warning";
+                } else if (value >= high){
+                    colorClass = "text-danger";
+                } else {
+                    colorClass = "text-secondary";
+                }
+                console.log(colorClass);
+                element.classList.remove("text-secondary", "text-success", "text-warning", "text-danger");
+                element.classList.add(colorClass);
+            }
+
+            if (document.readyState === 'complete') {
+                console.log("Sending fetch...");
+                fetch('http://192.168.1.106/status')
+                    .then(response => response.json())
+                    .then(json => {
+                        let cpuElement = document.getElementById("cpu");
+                        let cpuColorElement = document.getElementById("cpu-color");
+                        document.getElementById("ssid").innerText = json.network.ssid;
+                        document.getElementById("hostname").innerText = json.network.hostname;
+                        document.getElementById("ip").innerText = json.network.ip;
+                        document.getElementById("port").innerText = json.network.port;
+                        document.getElementById("rssi").innerText = json.network.rssi;
+                        document.getElementById("timezone").innerText = json.network.timezone;
+                        cpuElement.innerText = json.sensors.cpu;
+                        document.getElementById("psu").innerText = json.sensors.psu;
+                        document.getElementById("nic").innerText = json.sensors.nic;
+                        document.getElementById("raid").innerText = json.sensors.raid;
+                        document.getElementById("exp").innerText = json.sensors.exp;
+                        let status = json.power;
+                        const powericons = document.querySelectorAll('.powericon');
+                        if (status === 'ON') {
+                            powericons.forEach(item => {
+                                item.classList.remove('unknown', 'off');
+                                item.classList.add('on');
+                            });
+                        }else{
+                            powericons.forEach(item => {
+                                item.classList.remove('unknown', 'on');
+                                item.classList.add('off');
+                            });
+                        }
+
+                      determineClass(cpuColorElement, json.sensors.cpu, 30, 50);
+                        
+
+                    })
+                    .catch(error => {
+                        console.log(error);
+                        //handle error
+                    },
+                        {
+                            mode: "no-cors"
+                        }
+                    );
+            }
+        }
+    </script>
+
+</body>
+
+</html>
