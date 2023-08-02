@@ -1,8 +1,3 @@
-#ifndef STASSID
-#define STASSID "EXODUS"
-#define STAPSK "n952004$"
-#endif
-
 #define HOSTNAME "esxi01-rc"
 #define TIMEZONE "EET-2EEST,M3.5.0/3,M10.5.0/4" // https://gist.github.com/alwynallan/24d96091655391107939
 #define PORT 80

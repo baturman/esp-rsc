@@ -5,6 +5,7 @@
 #include <WiFi.h>
 #include <WiFiClient.h>
 
+#include "secrets.h"
 #include "config.h"
 #include "sntp.h"
 #include "time.h"
