@@ -3,7 +3,7 @@
 
 
 <head>
-    <title>esxi01-esp | 192.168.0.23</title>
+    <title>ESP - Remote Server Controller</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"
@@ -69,10 +69,10 @@
 
     <div class="container">
         <div class="row mt-3">
-            <div class="col-9 d-flex align-self-stretch">
+            <div class="col-5 d-flex align-self-stretch">
                 <div class="card w-100">
                     <div class="card-header fw-bolder">
-                        System Information
+                        Device Information
                     </div>
                     <div class="card-body fs-7">
 
@@ -82,34 +82,20 @@
                                 <table class="table table-sm">
                                     <tbody>
                                         <tr>
-                                            <th scope="row" class="w-25">SSID:</th>
-                                            <td id="ssid" class="w-75 text-secondary">N/A</td>
+                                            <th scope="row">Model:</th>
+                                            <td id="model" class="text-secondary">N/A</td>
                                         </tr>
                                         <tr>
-                                            <th scope="row" class="w-25">Hostname:</th>
-                                            <td id="hostname" class="w-75 text-secondary">N/A</td>
+                                            <th scope="row">Revision:</th>
+                                            <td id="revision" class="text-secondary">N/A</td>
                                         </tr>
                                         <tr>
-                                            <th scope="row" class="w-25">IP Address:</th>
-                                            <td id="ip" class="w-75 text-secondary">N/A</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                            <div class="col">
-                                <table class="table table-sm">
-                                    <tbody>
-                                        <tr>
-                                            <th scope="row" class="w-25">Server Port:</th>
-                                            <td id="port" class="w-75 text-secondary">N/A</td>
+                                            <th scope="row">Cores:</th>
+                                            <td id="cores" class="text-secondary">N/A</td>
                                         </tr>
                                         <tr>
-                                            <th scope="row" class="w-25">Wifi Signal:</th>
-                                            <td class="w-75 text-secondary"><span id="rssi">0</span> dBm</td>
-                                        </tr>
-                                        <tr>
-                                            <th scope="row" class="w-25">Timezone:</th>
-                                            <td id="timezone" class="w-75 text-secondary">N/A</td>
+                                            <th scope="row">MAC Address:</th>
+                                            <td id="mac" class="text-secondary">N/A</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -120,13 +106,48 @@
                     </div>
                 </div>
             </div>
-            <div class="col-3 d-flex align-self-stretch">
+
+            <div class="col-5 d-flex align-self-stretch">
                 <div class="card w-100">
                     <div class="card-header fw-bolder">
-                        System Status
+                        Network Information
+                    </div>
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <table class="table table-sm">
+                                    <tbody>
+                                        <tr>
+                                            <th scope="row">SSID:</th>
+                                            <td id="ssid" class="text-secondary">N/A</td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">Hostname:</th>
+                                            <td id="hostname" class="text-secondary">N/A</td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">IP:</th>
+                                            <td id="ip" class="text-secondary">N/A</td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row" class="w-25">Wifi Signal:</th>
+                                            <td class="w-75 text-secondary"><span id="rssi">0</span> dBm</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-2 d-flex align-self-stretch">
+                <div class="card w-100">
+                    <div class="card-header fw-bolder">
+                        Power Status
                     </div>
                     <div class="card-body text-center">
-                        <svg width="100px" height="100px" viewBox="0 0 24 24">
+                        <svg width="150px" height="150px" viewBox="0 0 24 24">
                             <g id="_icons">
                                 <g>
                                     <path class="powericon unknown"
@@ -138,6 +159,7 @@
                     </div>
                 </div>
             </div>
+
         </div>
 
 
@@ -233,7 +255,7 @@
 
 
         $(document).ready(function () {
-
+            const backendService = "http://192.168.1.106/"
 
             const powerOn = document.getElementById("power-on");
             const powerOff = document.getElementById("power-off");
@@ -253,12 +275,15 @@
             const expColorElement = document.getElementById("exp-color");
 
 
+            const modelElement = document.getElementById("model");
+            const revisionElement = document.getElementById("revision");
+            const coresElement = document.getElementById("cores");
+            const macElement = document.getElementById("mac");
+
             const ssidElement = document.getElementById("ssid");
             const hostnameElement = document.getElementById("hostname");
             const ipElement = document.getElementById("ip");
-            const portElement = document.getElementById("port");
             const rssiElement = document.getElementById("rssi");
-            const timezoneElement = document.getElementById("timezone");
 
 
             const toastLive = document.getElementById('liveToast');
@@ -290,13 +315,13 @@
             conModalOk.addEventListener('click', () => {
                 conModal.hide();
                 if (conModalOk.dataset.target === 'power-on') {
-                    performAction("http://172.16.1.48/power/on");
+                    performAction(backendService + "power/on");
                 } else if (conModalOk.dataset.target === 'power-off') {
-                    performAction("http://172.16.1.48/power/off");
+                    performAction(backendService + "power/off");
                 } else if (conModalOk.dataset.target === 'shutdown') {
-                    performAction("http://172.16.1.48/power/shutdown");
+                    performAction(backendService + "power/shutdown");
                 } else if (conModalOk.dataset.target === 'reset') {
-                    performAction("http://172.16.1.48/reset");
+                    performAction(backendService + "reset");
                 }
             });
 
@@ -374,10 +399,12 @@
                 ssidElement.innerText = json.network.ssid;
                 hostnameElement.innerText = json.network.hostname;
                 ipElement.innerText = json.network.ip;
-                portElement.innerText = json.network.port;
                 rssiElement.innerText = json.network.rssi;
-                timezoneElement.innerText = json.network.timezone;
 
+                modelElement.innerText = json.device.model;
+                revisionElement.innerText = json.device.revision;
+                coresElement.innerText = json.device.cores;
+                macElement.innerText = json.device.mac;
 
                 cpuElement.innerText = json.sensors.cpu;
                 psuElement.innerText = json.sensors.psu;
@@ -385,6 +412,7 @@
                 raidElement.innerText = json.sensors.raid;
                 expElement.innerText = json.sensors.exp;
 
+                $(document).attr("title", "ESP - Remote Server Controller - " + json.network.hostname + "|" + json.network.ip);
 
                 let status = json.power;
                 const powericons = document.querySelectorAll('.powericon');
@@ -411,7 +439,7 @@
 
             function updateStatus() {
                 $.ajax({
-                    url: "http://192.168.1.106/status",
+                    url: backendService + "status",
                     type: 'GET',
                     dataType: 'json',
                     success: function (res) {

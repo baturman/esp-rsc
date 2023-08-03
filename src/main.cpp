@@ -5,8 +5,8 @@
 #include <WiFi.h>
 #include <WiFiClient.h>
 
-#include "secrets.h"
 #include "config.h"
+#include "secrets.h"
 #include "sntp.h"
 #include "time.h"
 
@@ -161,13 +161,17 @@ void statusHandler() {
   String result;
   result += "{\n";
   result += "  \"power\": \"" + powerStatus + "\",\n";
+  result += "  \"device\": {\n";
+  result += "    \"model\": \"" + String(ESP.getChipModel()) + "\",\n";
+  result += "    \"revision\": \"" + String(ESP.getChipRevision()) + "\",\n";
+  result += "    \"cores\": \"" + String(ESP.getChipCores()) + "\",\n";
+  result += "    \"mac\": \"" + String(WiFi.macAddress()) + "\"\n";
+  result += "   },\n";
   result += "  \"network\": {\n";
   result += "    \"ssid\": \"" + String(ssid) + "\",\n";
   result += "    \"ip\": \"" + String(localIp) + "\",\n";
   result += "    \"hostname\": \"" + String(HOSTNAME) + "\",\n";
-  result += "    \"port\": " + String(PORT) + ",\n";
-  result += "    \"rssi\": " + String(rssi) + ",\n";
-  result += "    \"timezone\": \"" + String(TIMEZONE) + "\"\n";
+  result += "    \"rssi\": " + String(rssi) + "\n";
   result += "   },\n";
   result += "  \"sensors\": {\n";
   result += "    \"cpu\": " + String(cpuTemp) + ",\n";
