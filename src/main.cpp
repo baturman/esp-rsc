@@ -20,14 +20,21 @@ float nicTemp = 0;
 float raidTemp = 0;
 float expTemp = 0;
 
-const int moboResetBtn = 19; // marked as D1 on the board D6 (12)
-const int moboPowerBtn = 18; // marked as D2 on the board D7 (13)
-const int moboPowerLed = 4;
+const uint8_t moboResetBtn = 17; // marked as D1 on the board D6 (12)
+const uint8_t moboPowerBtn = 16; // marked as D2 on the board D7 (13)
+const uint8_t moboPowerLed = 4;
 const uint8_t cpuTempNtc = 34;
 const uint8_t nicTempNtc = 35;
 const uint8_t psuTempNtc = 32;
 const uint8_t raidTempNtc = 33;
 const uint8_t expTempNtc = 39;
+
+const uint8_t ledPower = 18;
+const uint8_t led3 = 19;
+const uint8_t led2 = 21;
+const uint8_t led1 = 22;
+const uint8_t ledAlert = 23;
+
 
 String powerStatus = "OFF";
 String oldPowerStatus = "OFF";
@@ -35,20 +42,23 @@ String oldPowerStatus = "OFF";
 SimpleTimer timer;
 WebServer server(PORT);
 
-float readTemperature(byte pin) {
+float readTemperature(byte pin)
+{
   int samples[NUMSAMPLES];
   uint8_t i;
   float average;
 
   // take N samples in a row, with a slight delay
-  for (i = 0; i < NUMSAMPLES; i++) {
+  for (i = 0; i < NUMSAMPLES; i++)
+  {
     samples[i] = analogRead(pin);
     delay(10);
   }
 
   // average all the samples out
   average = 0;
-  for (i = 0; i < NUMSAMPLES; i++) {
+  for (i = 0; i < NUMSAMPLES; i++)
+  {
     average += samples[i];
   }
   average /= NUMSAMPLES;
@@ -68,39 +78,52 @@ float readTemperature(byte pin) {
   steinhart /= BCOEFFICIENT;                        // 1/B * ln(R/Ro)
   steinhart += 1.0 / (TEMPERATURENOMINAL + 273.15); // + (1/To)
   steinhart = 1.0 / steinhart;                      // Invert
-  steinhart -= 273.15; // convert absolute temp to C
+  steinhart -= 273.15;                              // convert absolute temp to C
 
   return steinhart;
 }
 
-void powerSense() {
-  if (pulseIn(moboPowerLed, HIGH, 300000) > 100) {
+void powerSense()
+{
+  if (pulseIn(moboPowerLed, HIGH, 300000) > 100)
+  {
     powerStatus = "ON";
-    if (powerStatus != oldPowerStatus) {
+    if (powerStatus != oldPowerStatus)
+    {
       Serial.print("Power led: ");
       Serial.println(powerStatus);
       oldPowerStatus = powerStatus;
     }
-  } else if (digitalRead(moboPowerLed) == HIGH) {
+    digitalWrite(ledPower, HIGH);
+  }
+  else if (digitalRead(moboPowerLed) == HIGH)
+  {
     powerStatus = "ON";
-    if (powerStatus != oldPowerStatus) {
+    if (powerStatus != oldPowerStatus)
+    {
       Serial.print("Power led: ");
       Serial.println(powerStatus);
       oldPowerStatus = powerStatus;
     }
-  } else {
+    digitalWrite(ledPower, HIGH);
+  }
+  else
+  {
     powerStatus = "OFF";
-    if (powerStatus != oldPowerStatus) {
+    if (powerStatus != oldPowerStatus)
+    {
       Serial.print("Power led: ");
       Serial.println(powerStatus);
       oldPowerStatus = powerStatus;
     }
+    digitalWrite(ledPower, LOW);
   }
 }
 
 void rssiSense() { rssi = WiFi.RSSI(); }
 
-void tempSense() {
+void tempSense()
+{
   psuTemp = readTemperature(psuTempNtc);
   cpuTemp = readTemperature(cpuTempNtc);
   nicTemp = readTemperature(nicTempNtc);
@@ -108,7 +131,8 @@ void tempSense() {
   expTemp = readTemperature(expTempNtc);
 }
 
-void stats() {
+void stats()
+{
   char serialBuffer[128];
   sprintf(
       serialBuffer,
@@ -119,20 +143,23 @@ void stats() {
 }
 
 // Actions
-void resetPress() {
+void resetPress()
+{
   digitalWrite(moboResetBtn, HIGH);
   delay(300);
   digitalWrite(moboResetBtn, LOW);
 }
 
-void powerPress() {
+void powerPress()
+{
   Serial.println("Power press");
   digitalWrite(moboPowerBtn, HIGH);
   delay(1000);
   digitalWrite(moboPowerBtn, LOW);
 }
 
-void powerMomentaryPress() {
+void powerMomentaryPress()
+{
   Serial.println("Power momentary press");
   digitalWrite(moboPowerBtn, HIGH);
   delay(5000);
@@ -142,7 +169,8 @@ void powerMomentaryPress() {
 // Web Handlers
 void rootHandler() { server.send(200, "text/plain"); }
 
-void notFoundHandler() {
+void notFoundHandler()
+{
   String message = "File Not Found\n\n";
   message += "URI: ";
   message += server.uri();
@@ -151,13 +179,15 @@ void notFoundHandler() {
   message += "\nArguments: ";
   message += server.args();
   message += "\n";
-  for (uint8_t i = 0; i < server.args(); i++) {
+  for (uint8_t i = 0; i < server.args(); i++)
+  {
     message += " " + server.argName(i) + ": " + server.arg(i) + "\n";
   }
   server.send(404, "text/plain", message);
 }
 
-void statusHandler() {
+void statusHandler()
+{
   String result;
   result += "{\n";
   result += "  \"power\": \"" + powerStatus + "\",\n";
@@ -185,14 +215,18 @@ void statusHandler() {
   server.send(200, "application/json; charset=utf-8", result);
 }
 
-void resetHandler() {
+void resetHandler()
+{
   String result;
   result += "{\n";
-  if (powerStatus == "ON") {
+  if (powerStatus == "ON")
+  {
     resetPress();
     result += "  \"status\": \"success\",\n";
     result += "  \"message\": \"System has been reset.\"\n";
-  } else {
+  }
+  else
+  {
     result += "  \"status\": \"info\",\n";
     result += "  \"message\": \"System is off.\"\n";
   }
@@ -201,14 +235,18 @@ void resetHandler() {
   server.send(200, "application/json; charset=utf-8", result);
 }
 
-void powerOnHandler() {
+void powerOnHandler()
+{
   String result;
   result += "{\n";
-  if (powerStatus == "OFF") {
+  if (powerStatus == "OFF")
+  {
     powerPress();
     result += "  \"status\": \"success\",\n";
     result += "  \"message\": \"System has been powered up successfully.\"\n";
-  } else {
+  }
+  else
+  {
     result += "  \"status\": \"info\",\n";
     result += "  \"message\": \"System is already on.\"\n";
   }
@@ -217,14 +255,18 @@ void powerOnHandler() {
   server.send(200, "application/json; charset=utf-8", result);
 }
 
-void powerOffHandler() {
+void powerOffHandler()
+{
   String result;
   result += "{\n";
-  if (powerStatus == "ON") {
+  if (powerStatus == "ON")
+  {
     powerMomentaryPress();
     result += "  \"status\": \"success\",\n";
     result += "  \"message\": \"System has been powered down forcefully.\"\n";
-  } else {
+  }
+  else
+  {
     result += "  \"status\": \"info\",\n";
     result += "  \"message\": \"System is already off.\"\n";
   }
@@ -233,15 +275,19 @@ void powerOffHandler() {
   server.send(200, "application/json; charset=utf-8", result);
 }
 
-void powerShutdownHandler() {
+void powerShutdownHandler()
+{
   String result;
   result += "{\n";
-  if (powerStatus == "ON") {
+  if (powerStatus == "ON")
+  {
     powerPress();
     result += "  \"status\": \"success\",\n";
     result +=
         "  \"message\": \"Power off button pressed. ACPI shutdown started.\"\n";
-  } else {
+  }
+  else
+  {
     result += "  \"status\": \"info\",\n";
     result += "  \"message\": \"System is off.\"\n";
   }
@@ -251,16 +297,21 @@ void powerShutdownHandler() {
   server.send(200, "application/json; charset=utf-8", result);
 }
 
-void onWiFiDisconnect(WiFiEvent_t event, WiFiEventInfo_t info) {
+void onWiFiDisconnect(WiFiEvent_t event, WiFiEventInfo_t info)
+{
   Serial.printf("Disconnected from WiFi network. Reason: %d\n",
                 info.wifi_sta_disconnected.reason);
+  digitalWrite(led1, LOW);
   Serial.println("Reconnecting..");
 
   WiFi.begin(ssid, password);
+  digitalWrite(led1, HIGH);
 }
 
-void getChipId() {
-  for (int i = 0; i < 17; i = i + 8) {
+void getChipId()
+{
+  for (int i = 0; i < 17; i = i + 8)
+  {
     chipId |= ((ESP.getEfuseMac() >> (40 - i)) & 0xff) << i;
   }
 
@@ -271,28 +322,33 @@ void getChipId() {
   Serial.println(chipId);
 }
 
-void printLocalTime() {
+void printLocalTime()
+{
   struct tm timeinfo;
-  if (!getLocalTime(&timeinfo)) {
+  if (!getLocalTime(&timeinfo))
+  {
     Serial.println("No time available (yet)");
     return;
   }
   Serial.println(&timeinfo, "%A, %B %d %Y %H:%M:%S");
 }
 
-void timeavailable(struct timeval *t) {
+void timeavailable(struct timeval *t)
+{
   Serial.println("Got time adjustment from NTP!");
   printLocalTime();
 }
 
-void initialize() {
+void initialize()
+{
   Serial.println("Setup ntp...");
   sntp_set_time_sync_notification_cb(timeavailable);
   sntp_servermode_dhcp(1); // (optional)
   configTime(gmtOffset_sec, daylightOffset_sec, ntpServer1, ntpServer2);
 }
 
-void setup() {
+void setup()
+{
   delay(3000); // wait for serial monitor to start completely.
   Serial.begin(115200);
 
@@ -300,9 +356,20 @@ void setup() {
   pinMode(moboPowerBtn, OUTPUT);
   pinMode(moboResetBtn, OUTPUT);
 
+  pinMode(led1, OUTPUT);
+  pinMode(led2, OUTPUT);
+  pinMode(led3, OUTPUT);
+  pinMode(ledAlert, OUTPUT);
+  pinMode(ledPower, OUTPUT);
+
   digitalWrite(moboPowerBtn, LOW);
   digitalWrite(moboResetBtn, LOW);
 
+  digitalWrite(led1, LOW);
+  digitalWrite(led2, LOW);
+  digitalWrite(led3, LOW);
+  digitalWrite(ledAlert, LOW);
+  digitalWrite(ledPower, LOW);
   // set notification call-back function
   initialize();
 
@@ -312,7 +379,8 @@ void setup() {
 
   Serial.printf("Connecting to %s \n", ssid);
   WiFi.begin(ssid, password);
-  while (WiFi.status() != WL_CONNECTED) {
+  while (WiFi.status() != WL_CONNECTED)
+  {
     delay(500);
     Serial.print(".");
   }
@@ -322,7 +390,11 @@ void setup() {
 
   Serial.printf("Connected to SSID: %s, IP: %s, RSSI: %d dBm\n", ssid,
                 localIp.c_str(), rssi);
-  if (MDNS.begin(HOSTNAME)) {
+
+  digitalWrite(led1, HIGH);
+
+  if (MDNS.begin(HOSTNAME))
+  {
     Serial.println("MDNS responder started");
   }
 
@@ -340,13 +412,18 @@ void setup() {
   server.begin();
   Serial.println("HTTP server started.");
 
+  digitalWrite(led2, HIGH);
+  digitalWrite(led3, HIGH);
+  digitalWrite(ledAlert, HIGH);
+
   timer.setInterval(100, powerSense);
   timer.setInterval(3000, rssiSense);
   timer.setInterval(1000, tempSense);
   timer.setInterval(1000, stats);
 }
 
-void loop() {
+void loop()
+{
   server.handleClient();
   timer.run();
 }
