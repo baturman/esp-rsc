@@ -1,7 +1,5 @@
 #define HOSTNAME "esxi01-rc"
-#define TIMEZONE "EET-2EEST,M3.5.0/3,M10.5.0/4" // https://gist.github.com/alwynallan/24d96091655391107939
 #define PORT 80
-
 
 #define THERMISTORNOMINAL 10000                 // resistance at 25 degrees C
 #define TEMPERATURENOMINAL 25                   // temp. for nominal resistance (almost always 25 C)
@@ -11,5 +9,5 @@
 
 const char* ntpServer1 = "pool.ntp.org";
 const char* ntpServer2 = "time.nist.gov";
-const long  gmtOffset_sec = 3600;
-const int   daylightOffset_sec = 3600;
+const long  gmtOffset_sec = 3600 * 3;           // UTC+3
+const int   daylightOffset_sec = 0;             // No daylight savings.

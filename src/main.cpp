@@ -162,7 +162,7 @@ void powerMomentaryPress()
 {
   Serial.println("Power momentary press");
   digitalWrite(moboPowerBtn, HIGH);
-  delay(5000);
+  delay(3000);
   digitalWrite(moboPowerBtn, LOW);
 }
 
@@ -388,8 +388,7 @@ void setup()
   rssi = WiFi.RSSI();
   localIp = WiFi.localIP().toString();
 
-  Serial.printf("Connected to SSID: %s, IP: %s, RSSI: %d dBm\n", ssid,
-                localIp.c_str(), rssi);
+  Serial.printf("Connected to SSID: %s, IP: %s, RSSI: %d dBm\n", ssid, localIp.c_str(), rssi);
 
   digitalWrite(led1, HIGH);
 
@@ -416,7 +415,7 @@ void setup()
   digitalWrite(led3, HIGH);
   digitalWrite(ledAlert, HIGH);
 
-  timer.setInterval(100, powerSense);
+  timer.setInterval(30, powerSense);
   timer.setInterval(3000, rssiSense);
   timer.setInterval(1000, tempSense);
   timer.setInterval(1000, stats);
